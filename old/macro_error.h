@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-#define PRINT_ERR(MSG) fprintf(stderr, "\033[0;31m" "\n%s %s:%d\n\n" "\033[0m" , MSG, __FILE__, __LINE__)
+#define PRINT_ERR(MSG) fprintf(stderr, "\033[0;31m" "\nERROR: %s %s:%d\n\n" "\033[0m" , MSG, __FILE__, __LINE__)
 #define EXC_ERR() PRINT_ERR("Exception!") //Prints error massage for exceptions.
 #define MAL_ERR() PRINT_ERR("Memory allocation error!") // Prints error massage for memory allocation error.
 

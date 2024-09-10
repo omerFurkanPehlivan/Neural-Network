@@ -14,9 +14,8 @@ typedef struct matrix_class {
 //* FUNCTION PROTOTYPES ********************************************************
 
 Matrix matrix_new(size_t row, size_t col);
-//Matrix matrix_recreate(Matrix mtr, size_t row, size_t col);
-
 int matrix_destroy(Matrix* mtrP);
+
 double matrix_get(Matrix mtr, size_t row, size_t col);
 int matrix_set(Matrix mtr, size_t row, size_t col, double val);
 size_t matrix_get_row_num(Matrix mtr);
@@ -95,40 +94,14 @@ Matrix matrix_new(size_t row, size_t col)
 	return matrix;
 }
 
-/*
-Matrix matrix_recreate(Matrix mtr, size_t row, size_t col)
-{
-	double* nMtr;
-	Matrix tmp;
-	size_t n = row * col;
-
-	if (n > MAX_MATRIX_SIZE || n == 0) {
-		PRINT_ERR("Invalid size for matrix");
-		return NULL;
-	}
-
-	nMtr = (double*)malloc(row * col * sizeof(double));
-	CHECK_NULL_THEN(nMtr, return NULL;);
-
-	if (tmp) {
-		free(tmp);
-		tmp = NULL;
-	}
-
-	mtr->row = row;
-	mtr->col = col;
-	mtr->mtr = nMtr;
-	matrix_fill(mtr, 0);
-
-	return mtr;
-}*/
-
 int matrix_destroy(Matrix *mtrP)
 {
 	Matrix mtr;
 	double* _mtr;
+
 	CHECK_NULL_THEN(mtrP, return -1;);
 	mtr = *mtrP;
+	
 	CHECK_NULL_THEN(mtr, return -1;);
 
 	_mtr = mtr->mtr;
