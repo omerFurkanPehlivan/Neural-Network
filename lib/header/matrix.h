@@ -7,7 +7,8 @@
  * structure, which contains function pointers for each operation.
  */
 
-//TODO Row Operations
+//TODO Add Row Operations
+//TODO Add Random
 
 #pragma once
 
