@@ -8,7 +8,6 @@
  */
 
 //TODO Add Row Operations
-//TODO Add Random
 
 #pragma once
 
@@ -211,40 +210,84 @@ extern const struct MatrixInterface{
     } FBinary;
 
     /**
-    * @brief Multiplies two matrices.
-    * @param matrix1 The first matrix.
-    * @param matrix2 The second matrix.
-    * @return A new matrix that is the result of multiplying matrix1 and matrix2, or NULL on failure.
-    */
+     * @brief Multiplies two matrices.
+     * @param matrix1 The first matrix.
+     * @param matrix2 The second matrix.
+     * @return A new matrix that is the result of multiplying matrix1 and matrix2, or NULL on failure.
+     */
     Matrix (*multiply)(const Matrix matrix1, const Matrix matrix2);
-
+ 
     /**
-    * @brief Transposes a matrix.
-    * @param matrix The matrix to transpose.
-    * @return A new matrix that is the transposed result of the input matrix, or NULL on failure.
-    */
+     * @brief Transposes a matrix.
+     * @param matrix The matrix to transpose.
+     * @return A new matrix that is the transposed result of the input matrix, or NULL on failure.
+     */
     Matrix (*transpose)(const Matrix matrix);
 
     /**
-    * @brief Copies a matrix.
-    * @param matrix The matrix to copy.
-    * @return A new matrix that is a copy of the input matrix, or NULL on failure.
-    */
+     * @brief Copies a matrix.
+     * @param matrix The matrix to copy.
+     * @return A new matrix that is a copy of the input matrix, or NULL on failure.
+     */
     Matrix (*copy)(const Matrix matrix);
 
     /**
-    * @brief Copies the new matrix to given address with destroying the old one.
-    * @param oldMatrixAddr Address of the pointer to the old matrix to replace.
-    * @param newMatrix The new matrix.
-    * @return 0 on success, -1 on failure.
-    */
+     * @brief Copies a submatrix of a matrix.
+     * @param matrix The matrix to copy from.
+     * @param rowStart The starting row index.
+     * @param rowEnd The ending row index.
+     * @param colStart The starting column index.
+     * @param colEnd The ending column index.
+     * @return A new matrix that is a copy of the submatrix, or NULL on failure.
+     */
+    Matrix (*copySubMatrix)(const Matrix matrix, size_t rowStart, size_t rowEnd, 
+        size_t colStart, size_t colEnd);
+
+    /**
+     * @brief Appends a row to a matrix.
+     * @param matrix The matrix to append the row to.
+     * @param row The row to append.
+     * @return A new matrix that is the result of appending the row to the matrix, or NULL on failure.
+     */
+    Matrix (*appendRow)(const Matrix matrix, const Matrix row);
+
+    /**
+     * @brief Appends a column to a matrix.
+     * @param matrix The matrix to append the column to.
+     * @param col The column to append.
+     * @return A new matrix that is the result of appending the column to the matrix, or NULL on failure.
+     */
+    Matrix (*appendCol)(const Matrix matrix, const Matrix col);
+
+    /**
+     * @brief Randomizes the elements of a matrix within a specified range.
+     * @param matrix The matrix to randomize.
+     * @param min The minimum value for the random range.
+     * @param max The maximum value for the random range.
+     * @return 0 on success, -1 on failure.
+     * @note The random values are generated using the rand() function from the C standard library.
+     * It is recommended to seed the random number generator using srand() before calling this function.
+     */
+    int (*randomize)(Matrix matrix, double min, double max);
+
+    /**
+     * @brief Copies the new matrix to given address with destroying the old one.
+     * @param oldMatrixAddr Address of the pointer to the old matrix to replace.
+     * @param newMatrix The new matrix.
+     * @return 0 on success, -1 on failure.
+     */
     int (*replace)(Matrix* oldMatrixAddr, const Matrix newMatrix);
 
     /**
-    * @brief Checks if a matrix is valid.
-    * @param matrix The matrix to check.
-    * @return 1 if the matrix is valid, 0 if invalid.
-    */
+     * @brief Checks if a matrix is valid.
+     * @param matrix The matrix to check.
+     * @return 1 if the matrix is valid, 0 if invalid.
+     */
     int (*isValid)(const Matrix matrix);
 
+    /**
+     * @brief Prints the elements of a matrix to the standard output.
+     * @param matrix The matrix to print.
+     */
+    void (*print)(const Matrix matrix);
 } MatrixOps;
