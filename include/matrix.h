@@ -2,9 +2,7 @@
  * @file matrix.h
  * @brief Interface for matrix operations.
  *
- * This file provides an interface for various matrix operations, including creation, destruction,
- * element access, arithmetic operations, and more. The operations are defined in the `MatrixInterface`
- * structure, which contains function pointers for each operation.
+ * This file provides an interface for various matrix operations.
  */
 
 //TODO Add Row Operations
@@ -186,7 +184,7 @@ extern const struct MatrixInterface{
          * @return The absolute value of the input.
          */
         double (*abs)(double value);
-    } FUnary;
+    } fUnary;
 
     /**
      * @brief Predefined binary functions for matrix operations.
@@ -207,7 +205,7 @@ extern const struct MatrixInterface{
          * @return The result of multiplying matrixValue and value.
          */
         double (*mul)(double matrixValue, double value);
-    } FBinary;
+    } fBinary;
 
     /**
      * @brief Multiplies two matrices.
@@ -216,6 +214,14 @@ extern const struct MatrixInterface{
      * @return A new matrix that is the result of multiplying matrix1 and matrix2, or NULL on failure.
      */
     Matrix (*multiply)(const Matrix matrix1, const Matrix matrix2);
+
+    /**
+     * @brief Fills a matrix with a specified value.
+     * @param matrix The matrix to fill.
+     * @param value The value to fill the matrix with.
+     * @return 0 on success, -1 on failure.
+     */
+    int (*fill)(Matrix matrix, double value);
  
     /**
      * @brief Transposes a matrix.
