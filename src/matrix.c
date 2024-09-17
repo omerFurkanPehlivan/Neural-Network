@@ -1,5 +1,6 @@
 #include "../include/matrix.h"
 #include "../lib/macro_error.h"
+#include "../lib/auto_destroyable.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -26,27 +27,35 @@ int add(Matrix matrix1, const Matrix matrix2);
 int subtract(Matrix matrix1, const Matrix matrix2);
 int scalarMultiply(const Matrix matrix1, double scalar);
 int applyToAllUnary(Matrix matrix, double (*func)(double));
-int applyToAllBinary(Matrix matrix, double (*func)(double, double), double value);
-int elementWise(Matrix matrix1, const Matrix matrix2, double (*func)(double, double));
+int applyToAllBinary(Matrix matrix, double (*func)(double, double),
+	double value);
+int elementWise(Matrix matrix1, const Matrix matrix2,
+	double (*func)(double, double));
 Matrix addOutOfPlace(const Matrix matrix1, const Matrix matrix2);
 Matrix subtractOutOfPlace(const Matrix matrix1, const Matrix matrix2);
 Matrix scalarMultiplyOutOfPlace(const Matrix matrix, double scalar);
 Matrix applyToAllUnaryOutOfPlace(const Matrix matrix, double (*func)(double));
-Matrix applyToAllBinaryOutOfPlace(const Matrix matrix, double (*func)(double, double), double value);
-Matrix elementWiseOutOfPlace(const Matrix matrix1, const Matrix matrix2, double (*func)(double, double));
+Matrix applyToAllBinaryOutOfPlace(const Matrix matrix,
+	double (*func)(double, double), double value);
+Matrix elementWiseOutOfPlace(const Matrix matrix1, const Matrix matrix2,
+	double (*func)(double, double));
 double absFunc(double value);
 double addFunc(double matrixValue, double value);
 double mulFunc(double matrixValue, double value);
 Matrix multiply(const Matrix matrix1, const Matrix matrix2);
+int sum(const Matrix matrix, double* result);
 int fill(Matrix matrix, double value);
 Matrix transpose(const Matrix matrix);
 Matrix copy(const Matrix matrix);
-Matrix copySubMatrix(const Matrix matrix, size_t rowStart, size_t rowEnd, size_t colStart, size_t colEnd);
+Matrix copySubMatrix(const Matrix matrix, size_t rowStart, size_t rowEnd,
+	size_t colStart, size_t colEnd);
 Matrix appendRow(const Matrix matrix, const Matrix row);
 Matrix appendCol(const Matrix matrix, const Matrix col);
 int randomize(Matrix matrix, double min, double max);
 int replace(Matrix* oldMatrixAddr, const Matrix newMatrix);
+int assignValues(Matrix matrix1, const Matrix matrix2);
 int isValid(const Matrix matrix);
+int isSameShape(const Matrix matrix1, const Matrix matrix2);
 void print(const Matrix matrix);
 
 //* INTERFACE INITIALIZATION **************************************************
@@ -80,6 +89,7 @@ const struct MatrixInterface MatrixOps = {
 		.mul = mulFunc
 	},
 	.multiply = multiply,
+	.sum = sum,
 	.fill = fill,
 	.transpose = transpose,
 	.copy = copy,
@@ -88,7 +98,9 @@ const struct MatrixInterface MatrixOps = {
 	.appendCol = appendCol,
 	.randomize = randomize,
 	.replace = replace,
+	.assignValues = assignValues,
 	.isValid = isValid,
+	.isSameShape = isSameShape,
 	.print = print
 };
 
@@ -288,6 +300,11 @@ int applyToAllUnary(Matrix matrix, double (*func)(double))
 		return -1;
 	}
 
+	if (func == NULL) {
+		PRINT_ERR("NULL pointer exception! (func)");
+		return -1;
+	}
+
 	n = matrix->row * matrix->col;
 
 	data = matrix->data;
@@ -299,7 +316,8 @@ int applyToAllUnary(Matrix matrix, double (*func)(double))
 	return 0;
 }
 
-int applyToAllBinary(Matrix matrix, double (*func)(double, double), double value)
+int applyToAllBinary(Matrix matrix, double (*func)(double, double),
+	double value)
 {
 	size_t i, n;
 	double* data;
@@ -320,7 +338,8 @@ int applyToAllBinary(Matrix matrix, double (*func)(double, double), double value
 	return 0;
 }
 
-int elementWise(Matrix matrix1, const Matrix matrix2, double (*func)(double, double))
+int elementWise(Matrix matrix1, const Matrix matrix2,
+	double (*func)(double, double))
 {
 	size_t i, n;
 	double* data1, * data2;
@@ -434,7 +453,8 @@ Matrix applyToAllUnaryOutOfPlace(const Matrix matrix, double (*func)(double))
 	return resultMatrix;
 }
 
-Matrix applyToAllBinaryOutOfPlace(const Matrix matrix, double (*func)(double, double), double value)
+Matrix applyToAllBinaryOutOfPlace(const Matrix matrix,
+	double (*func)(double, double), double value)
 {
 	Matrix resultMatrix;
 
@@ -453,7 +473,8 @@ Matrix applyToAllBinaryOutOfPlace(const Matrix matrix, double (*func)(double, do
 	return resultMatrix;
 }
 
-Matrix elementWiseOutOfPlace(const Matrix matrix1, const Matrix matrix2, double (*func)(double, double))
+Matrix elementWiseOutOfPlace(const Matrix matrix1, const Matrix matrix2,
+	double (*func)(double, double))
 {
 	Matrix resultMatrix;
 
@@ -534,6 +555,27 @@ Matrix multiply(const Matrix matrix1, const Matrix matrix2)
 	return resultMatrix;
 }
 
+int sum(const Matrix matrix, double *result)
+{
+	size_t i, n;
+    if (!isValid(matrix)) {
+		PRINT_ERR("Invalid matrix!");
+		return -1;
+	}
+
+	if (result == NULL) {
+		return -1;
+	}
+
+	n = matrix->row * matrix->col;
+	*result = 0;
+	for (size_t i = 0; i < n; i++) {
+		*result += matrix->data[i];
+	}
+
+	return 0;
+}
+
 int fill(Matrix matrix, double value)
 {
 	size_t i, n;
@@ -608,7 +650,8 @@ Matrix copy(const Matrix matrix)
 	return resultMatrix;
 }
 
-Matrix copySubMatrix(const Matrix matrix, size_t rowStart, size_t rowEnd, size_t colStart, size_t colEnd)
+Matrix copySubMatrix(const Matrix matrix, size_t rowStart, size_t rowEnd,
+	size_t colStart, size_t colEnd)
 {
 	size_t row, col, newRow, newCol, i;
 	double* data, * toData;
@@ -646,7 +689,8 @@ Matrix copySubMatrix(const Matrix matrix, size_t rowStart, size_t rowEnd, size_t
 
 	// Copy row by row
 	for (i = rowStart; i <= rowEnd; i++) {
-		memcpy(toData + (i - rowStart) * newCol, data + i * col + colStart, newCol * sizeof(double));
+		memcpy(toData + (i - rowStart) * newCol, data + i * col + colStart,
+			newCol * sizeof(double));
 	}
 
 	return resultMatrix;
@@ -722,10 +766,12 @@ Matrix appendCol(const Matrix matrix, const Matrix col)
 	toData = resultMatrix->data;
 
 
-	// Copy ith row of data1 and ith row of data2 to ith row of toData every step
+	// Copy ith row of data1 and data2 to ith row of toData every step
 	for (i = 0; i < row1; i++) {
-		memcpy(toData + i * (col1 + col2), data1 + i * col1, col1 * sizeof(double));
-		memcpy(toData + i * (col1 + col2) + col1, data2 + i * col2, col2 * sizeof(double));
+		memcpy(toData + i * (col1 + col2), data1 + i * col1,
+			col1 * sizeof(double));
+		memcpy(toData + i * (col1 + col2) + col1, data2 + i * col2,
+			col2 * sizeof(double));
 	}
 
 	return resultMatrix;
@@ -778,6 +824,28 @@ int replace(Matrix* oldMatrixAddr, const Matrix newMatrix)
 	return 0;
 }
 
+int assignValues(Matrix matrix1, const Matrix matrix2)
+{
+	size_t i, n;
+	double* data1, * data2;
+
+	if (!isValid(matrix1) || !isValid(matrix2)) {
+		PRINT_ERR("Invalid matrix!");
+		return -1;
+	}
+
+	if (!isSameShape(matrix1, matrix2)) {
+		PRINT_ERR("Matrix dimensions do not match!");
+		return -1;
+	}
+
+
+	memcpy(matrix1->data, matrix2->data,
+		matrix1->row * matrix1->col * sizeof(double));
+
+    return 0;
+}
+
 int isValid(const Matrix matrix)
 {
 	if (matrix == NULL) {
@@ -792,6 +860,20 @@ int isValid(const Matrix matrix)
 
 	if (matrix->data == NULL) {
 		PRINT_ERR("NULL pointer exception! (matrix->data)");
+		return 0;
+	}
+
+	return 1;
+}
+
+int isSameShape(const Matrix matrix1, const Matrix matrix2)
+{
+	if (!isValid(matrix1) || !isValid(matrix2)) {
+		PRINT_ERR("Invalid matrix!");
+		return 0;
+	}
+
+	if (matrix1->row != matrix2->row || matrix1->col != matrix2->col) {
 		return 0;
 	}
 

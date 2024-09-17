@@ -9,6 +9,7 @@
 
 #pragma once
 
+
 #include <stddef.h>
 
 /**
@@ -216,6 +217,14 @@ extern const struct MatrixInterface{
     Matrix (*multiply)(const Matrix matrix1, const Matrix matrix2);
 
     /**
+     * @brief Computes the sum of all elements in a matrix.
+     * @param matrix The matrix to sum.
+     * @param result Pointer to store the sum.
+     * @return 0 on success, -1 on failure.
+     */
+    int (*sum)(const Matrix matrix, double* result);
+
+    /**
      * @brief Fills a matrix with a specified value.
      * @param matrix The matrix to fill.
      * @param value The value to fill the matrix with.
@@ -285,11 +294,28 @@ extern const struct MatrixInterface{
     int (*replace)(Matrix* oldMatrixAddr, const Matrix newMatrix);
 
     /**
+     * @brief Assigns the values of matrix2 to matrix1.
+     * @param matrix1 The matrix to assign to.
+     * @param matrix2 The matrix to assign from.
+     * @return 0 on success, -1 on failure.
+     * @note The dimensions of matrix1 and matrix2 must match.
+     */
+    int (*assignValues)(Matrix matrix1, const Matrix matrix2);
+
+    /**
      * @brief Checks if a matrix is valid.
      * @param matrix The matrix to check.
      * @return 1 if the matrix is valid, 0 if invalid.
      */
     int (*isValid)(const Matrix matrix);
+
+    /**
+     * @brief Checks if two matrices have the same shape.
+     * @param matrix1 The first matrix.
+     * @param matrix2 The second matrix.
+     * @return 1 if the matrices have the same shape, 0 if not.
+     */
+    int (*isSameShape)(const Matrix matrix1, const Matrix matrix2);
 
     /**
      * @brief Prints the elements of a matrix to the standard output.
